@@ -19,6 +19,16 @@ type CallbackQueryType string
 const SimplePollType CallbackQueryType = `SIMPLE_POLL`
 const CallbackQueryParamDelimiter = `||`
 
+func removeChatUser(chatUsers []models.ChatUser, chatIDToRemove int64) []models.ChatUser {
+	var result []models.ChatUser
+	for _, user := range chatUsers {
+		if user.ChatId != chatIDToRemove {
+			result = append(result, user)
+		}
+	}
+	return result
+}
+
 func play(chatUsers []models.ChatUser) int64 {
 	if len(chatUsers) <= 0 {
 		return -1
@@ -65,6 +75,11 @@ func Pidor(chatId int64) {
 		return
 	}
 	chatUsers := dao.GetEnabledChatUsersByChatId(chatId)
+
+	activeHero := dao.FindActiveHeroByChatId(chatId)
+	if activeHero != nil {
+		chatUsers = removeChatUser(chatUsers, activeHero.ChatId)
+	}
 
 	winnerIndex := play(chatUsers)
 	if winnerIndex < 0 {
@@ -136,7 +151,14 @@ func Hero(chatId int64) {
 		bot.SendMessage(chatId, msg)
 		return
 	}
+
 	chatUsers := dao.GetEnabledChatUsersByChatId(chatId)
+
+	activePidor := dao.FindActivePidorByChatId(chatId)
+	if activePidor != nil {
+		chatUsers = removeChatUser(chatUsers, activePidor.ChatId)
+	}
+
 	winnerIndex := play(chatUsers)
 	if winnerIndex < 0 {
 		bot.SendMessage(chatId, locale.Loc(locale.DefaultLang, `at_least_one_user`))
@@ -176,10 +198,12 @@ func resetHero(chatId int64) {
 
 func Run(chatId int64) {
 	Pidor(chatId)
+	time.Sleep(1 * time.Second)
 	Hero(chatId)
 }
 
 func List(chatId int64) {
 	PidorList(chatId)
+	time.Sleep(1 * time.Second)
 	HeroList(chatId)
 }
