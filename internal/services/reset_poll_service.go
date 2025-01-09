@@ -1,6 +1,9 @@
 package services
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/LugaMuga/UOFDBot/internal/bot"
 	"github.com/LugaMuga/UOFDBot/internal/config"
 	"github.com/LugaMuga/UOFDBot/internal/dao"
@@ -8,8 +11,6 @@ import (
 	"github.com/LugaMuga/UOFDBot/internal/models"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"strconv"
-	"strings"
 )
 
 const ResetPidorPoll = `RESET_PIDOR`
@@ -85,10 +86,8 @@ func resetByPollName(chatId int64, msgId int, callbackId string, pollName string
 	switch pollName {
 	case ResetPidorPoll:
 		resetPidor(chatId)
-		break
 	case ResetHeroPoll:
 		resetHero(chatId)
-		break
 	default:
 		msg := locale.Loc(locale.DefaultLang, `stat_not_reset`)
 		bot.Bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackId, msg))
