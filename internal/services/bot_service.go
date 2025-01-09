@@ -1,15 +1,17 @@
 package services
 
 import (
-	"crypto/rand"
+	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/LugaMuga/UOFDBot/internal/bot"
 	"github.com/LugaMuga/UOFDBot/internal/dao"
 	"github.com/LugaMuga/UOFDBot/internal/locale"
 	"github.com/LugaMuga/UOFDBot/internal/models"
 	"github.com/LugaMuga/UOFDBot/internal/utils"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
-	"log"
-	"math/big"
 )
 
 type CallbackQueryType string
@@ -22,8 +24,7 @@ func play(chatUsers []models.ChatUser) int64 {
 		return -1
 	} else {
 		numberOfChatUsers := int64(len(chatUsers))
-		r, _ := rand.Int(rand.Reader, big.NewInt(numberOfChatUsers))
-		return r.Int64()
+		return utils.GetRandomInt(0, numberOfChatUsers-1)
 	}
 }
 
@@ -64,6 +65,7 @@ func Pidor(chatId int64) {
 		return
 	}
 	chatUsers := dao.GetEnabledChatUsersByChatId(chatId)
+
 	winnerIndex := play(chatUsers)
 	if winnerIndex < 0 {
 		bot.SendMessage(chatId, locale.Loc(locale.DefaultLang, `at_least_one_user`))
@@ -72,6 +74,18 @@ func Pidor(chatId int64) {
 	chatUsers[winnerIndex].PidorScore += 1
 	chatUsers[winnerIndex].PidorLastTimestamp = utils.NowUnix()
 	dao.UpdateChatUserPidorWins(chatUsers[winnerIndex])
+
+	randomSetNumber := utils.GetRandomInt(1, 3)
+	randomSetKey := fmt.Sprintf("pidor_of_day_set%d", randomSetNumber)
+
+	randomSetText := locale.Loc(locale.DefaultLang, randomSetKey)
+	randomSet := strings.Split(randomSetText, "\n")
+
+	for _, msg := range randomSet {
+		bot.SendMessage(chatId, msg)
+		time.Sleep(1 * time.Second)
+	}
+
 	msg := utils.FormatPidorWinner(chatUsers[winnerIndex])
 	bot.SendMessage(chatId, msg)
 }
@@ -131,6 +145,18 @@ func Hero(chatId int64) {
 	chatUsers[winnerIndex].HeroScore += 1
 	chatUsers[winnerIndex].HeroLastTimestamp = utils.NowUnix()
 	dao.UpdateChatUserHeroWins(chatUsers[winnerIndex])
+
+	randomSetNumber := utils.GetRandomInt(1, 3)
+	randomSetKey := fmt.Sprintf("hero_of_day_set%d", randomSetNumber)
+
+	randomSetText := locale.Loc(locale.DefaultLang, randomSetKey)
+	randomSet := strings.Split(randomSetText, "\n")
+
+	for _, msg := range randomSet {
+		bot.SendMessage(chatId, msg)
+		time.Sleep(1 * time.Second)
+	}
+
 	msg := utils.FormatHeroWinner(chatUsers[winnerIndex])
 	bot.SendMessage(chatId, msg)
 }
