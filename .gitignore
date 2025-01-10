@@ -18,6 +18,7 @@
 *.iml
 
 *backup
+*.bak
 *.db
 /prod-config.yml
 UOFDBot
