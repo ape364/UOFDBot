@@ -19,10 +19,10 @@ type CallbackQueryType string
 const SimplePollType CallbackQueryType = `SIMPLE_POLL`
 const CallbackQueryParamDelimiter = `||`
 
-func removeChatUser(chatUsers []models.ChatUser, chatIDToRemove int64) []models.ChatUser {
+func removeChatUser(chatUsers []models.ChatUser, userIdToRemove int) []models.ChatUser {
 	var result []models.ChatUser
 	for _, user := range chatUsers {
-		if user.ChatId != chatIDToRemove {
+		if user.UserId != userIdToRemove {
 			result = append(result, user)
 		}
 	}
@@ -78,7 +78,7 @@ func Pidor(chatId int64) {
 
 	activeHero := dao.FindActiveHeroByChatId(chatId)
 	if activeHero != nil {
-		chatUsers = removeChatUser(chatUsers, activeHero.ChatId)
+		chatUsers = removeChatUser(chatUsers, activeHero.UserId)
 	}
 
 	winnerIndex := play(chatUsers)
@@ -156,7 +156,7 @@ func Hero(chatId int64) {
 
 	activePidor := dao.FindActivePidorByChatId(chatId)
 	if activePidor != nil {
-		chatUsers = removeChatUser(chatUsers, activePidor.ChatId)
+		chatUsers = removeChatUser(chatUsers, activePidor.UserId)
 	}
 
 	winnerIndex := play(chatUsers)
